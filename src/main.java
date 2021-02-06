@@ -7,11 +7,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public  class main
 {
-
+	static ArrayList<String> headers = new ArrayList<String>();
+	static ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
 	static boolean OS = isWindows();
 	public static Boolean isWindows()
 	{
