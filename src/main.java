@@ -127,18 +127,25 @@ public  class main
 		{
 			path = "/Users/paulkrznaric/IdeaProjects/Dec2020.xlsx";
 		}
-
 		try
 		{
 			importSheet(path);
 			ArrayList<Object> current = new ArrayList<>();
 			int billingCount, duration;
 			String jNumber;
+			ArrayList<String> doctors;
 			LocalDateTime timeIn, timeOut;
 
 			for(int i = 1; i < data.size(); i++)
 			{
 				current = data.get(i);
+				doctors = new ArrayList<>();
+				doctors.add((String) current.get(5));
+				String otherDoc = (String) current.get(7);
+				if(!(otherDoc.equals("") || otherDoc.equals(".")))
+				{
+					doctors.add((String) current.get(7));
+				}
 
 				jNumber = (String) current.get(0);
 				while(jNumber.startsWith("J") || jNumber.startsWith("0"))
@@ -156,16 +163,27 @@ public  class main
 					billingCount = 1;
 
 				}
-				//TODO: check for multiple doctors
-				else if(duration >= 7)
+				else if(duration >= 7 && doctors.size() != 2)
 				{
 					billingCount = 3;
+				}
+				else if(duration > 14 && doctors.size() == 2)
+				{
+					billingCount = 6;
 				}
 				else
 				{
 					billingCount = duration/2;
 				}
-				System.out.print(calculateBilling(billingCount, timeIn));
+				System.out.print(calculateBilling(billingCount, timeIn) + "\t\t\t");
+				if(doctors.size() == 2)
+				{
+					System.out.print(" Admitting doctor: " + doctors.get(0) + "\t\t\t" + "  Billing Doctor: " + doctors.get(1));
+				}
+				else
+				{
+					System.out.print(" Only doctor: " + doctors.get(0));
+				}
 				if(admitted(current))
 				{
 					System.out.print(" 1x CDI");
