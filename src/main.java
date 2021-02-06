@@ -33,15 +33,24 @@ public  class main
 		return (int) Duration.between(timeIn, timeOut).toHours();
 	}
 
-	//TODO: isWeekend Method
 	private static boolean isWeekend(LocalDateTime timeIn)
 	{
+		int day = timeIn.getDayOfWeek().getValue();
+		if(day == 6|| day == 7)
+		{
+			return true;
+		}
 		return false;
+
 	}
 
-	//TODO: isEarlyMorning Method
 	private static boolean isEarlyMorning(LocalDateTime timeIn)
 	{
+		int hour = timeIn.getHour();
+		if(hour < 7)
+		{
+			return true;
+		}
 		return false;
 	}
 
