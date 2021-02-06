@@ -7,17 +7,23 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
 public  class main
 {
-	static ArrayList<String> headers = new ArrayList<String>();
 	static ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
 	static boolean OS = isWindows();
 	public static Boolean isWindows()
 	{
 		return System.getProperty("os.name").startsWith("Windows");
+	}
+
+	public static int calculateTime(LocalDateTime timeIn, LocalDateTime timeOut)
+	{
+		return (int) Duration.between(timeIn, timeOut).toHours();
 	}
 	public static void main(String[] args) throws IOException
 	{
@@ -31,6 +37,7 @@ public  class main
 			}
 			else
 			{
+				fis = new FileInputStream((new File("/Users/paulkrznaric/IdeaProjects/Dec2020.xlsx")));
 				//do MacOS stuff here
 			}
 			XSSFWorkbook wb = new XSSFWorkbook(fis);
@@ -40,33 +47,63 @@ public  class main
 			{
 				Row row = itr.next();
 				Iterator<Cell> cellIterator = row.cellIterator();
+				ArrayList<Object> currentRow = new ArrayList<Object>();
 				while (cellIterator.hasNext())
 				{
 					Cell cell = cellIterator.next();
 					switch (cell.getCellType())
 					{
 						case Cell.CELL_TYPE_STRING:
-							System.out.print(cell.getStringCellValue() + "\t\t\t");
+							currentRow.add(cell.getStringCellValue());
 							break;
 						case Cell.CELL_TYPE_NUMERIC:
-							if(cell.getNumericCellValue() > 50)
+							if(cell.getNumericCellValue() > 1000)
 							{
-								System.out.print(cell.getDateCellValue() + "\t\t\t");
+								currentRow.add(cell.getDateCellValue().toInstant().atZone((ZoneId.systemDefault())).toLocalDateTime());
 							}
 							else
 							{
-								System.out.print(cell.getNumericCellValue() + "\t\t\t");
+								currentRow.add(cell.getNumericCellValue());
 							}
 							break;
-						case Cell.CELL_TYPE_BLANK:
-							System.out.print("\t\t\t");
-							break;
 						default:
+							currentRow.add("");
 							System.out.print("Bad value:" + cell.getCellType() + "\t\t\t");
 					}
 				}
+				data.add(currentRow);
 				System.out.println("");
+			}
+			ArrayList<Object> current = new ArrayList<Object>();
+			int billingCount, duration;
+			LocalDateTime timeIn, timeOut;
+			for(int i = 1; i < data.size(); i++)
+			{
+				current = data.get(i);
+				billingCount = 0;
+				System.out.print(current.get(0) + "\t\t\t");
+				timeIn = (LocalDateTime) current.get(4);
+				if(((String) current.get(1)).equalsIgnoreCase("DIS IN"))
+				{
+					System.out.print("Admitted" + "\t\t\t");
+					timeOut = (LocalDateTime) current.get(10);
 
+				}
+				else
+				{
+					System.out.print("Sent Home" + "\t\t\t");
+					timeOut = (LocalDateTime) current.get(8);
+				}
+				duration =  calculateTime(timeIn, timeOut);
+				if(duration == 2)
+				{
+					billingCount = 1;
+
+				}
+				else
+				{
+					billingCount = duration/2;
+				}
 			}
 		}
 		catch(Exception e)
