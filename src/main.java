@@ -53,7 +53,7 @@ public  class main
 
 	private static String calculateBilling(int billings, LocalDateTime timeIn)
 	{
-		String billingInfo = "1x CDA";
+		String billingInfo = "1x CDA" + "\t\t\t";
 		if(billings == 1)
 		{
 			if(isEarlyMorning(timeIn))
@@ -78,7 +78,6 @@ public  class main
 			billingInfo += " " + billings + "x CD0R";
 
 		}
-
 		return billingInfo;
 	}
 
@@ -139,6 +138,7 @@ public  class main
 			for(int i = 1; i < data.size(); i++)
 			{
 				current = data.get(i);
+
 				doctors = new ArrayList<>();
 				doctors.add((String) current.get(5));
 				String otherDoc = (String) current.get(7);
@@ -158,6 +158,7 @@ public  class main
 				timeOut = (LocalDateTime) current.get(8);
 				duration =  calculateTime(timeIn, timeOut);
 
+				//TODO: Print Date
 				if(duration == 2)
 				{
 					billingCount = 1;
@@ -176,6 +177,14 @@ public  class main
 					billingCount = duration/2;
 				}
 				System.out.print(calculateBilling(billingCount, timeIn) + "\t\t\t");
+				if(admitted(current))
+				{
+					System.out.print(" 1x CDI" + "\t\t\t");
+				}
+				else
+				{
+					System.out.print(" 1x CDO" + "\t\t\t");
+				}
 				if(doctors.size() == 2)
 				{
 					System.out.print(" Admitting doctor: " + doctors.get(0) + "\t\t\t" + "  Billing Doctor: " + doctors.get(1));
@@ -184,10 +193,7 @@ public  class main
 				{
 					System.out.print(" Only doctor: " + doctors.get(0));
 				}
-				if(admitted(current))
-				{
-					System.out.print(" 1x CDI");
-				}
+
 				System.out.println("");
 			}
 		}
