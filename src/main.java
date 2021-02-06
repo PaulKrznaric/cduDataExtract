@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
+@SuppressWarnings("ALL")
 public  class main
 {
-	static ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+	static ArrayList<ArrayList<Object>> data = new ArrayList<>();
 
 	static boolean OS = isWindows();
 
@@ -36,34 +37,23 @@ public  class main
 	private static boolean isWeekend(LocalDateTime timeIn)
 	{
 		int day = timeIn.getDayOfWeek().getValue();
-		if(day == 6|| day == 7)
-		{
-			return true;
-		}
-		return false;
+		return day == 6 || day == 7;
 
 	}
 
 	private static boolean isEarlyMorning(LocalDateTime timeIn)
 	{
-		int hour = timeIn.getHour();
-		if(hour < 7)
-		{
-			return true;
-		}
-		return false;
+		return timeIn.getHour() < 7;
 	}
 
-	//TODO: isNight Method
 	private static boolean isNight(LocalDateTime timeIn)
 	{
-		return false;
+		return timeIn.getHour() > 5;
 	}
 
 	private static String calculateBilling(int billings, LocalDateTime timeIn)
 	{
-		String billingInfo = "";
-		billingInfo = "1x CDA";
+		String billingInfo = "1x CDA";
 		if(billings == 1)
 		{
 			if(isEarlyMorning(timeIn))
@@ -97,12 +87,10 @@ public  class main
 		FileInputStream fis = new FileInputStream(new File(path));
 		XSSFWorkbook wb = new XSSFWorkbook(fis);
 		XSSFSheet sheet = wb.getSheetAt(0);
-		Iterator<Row> itr = sheet.iterator();
-		while (itr.hasNext())
+		for (Row row : sheet)
 		{
-			Row row = itr.next();
 			Iterator<Cell> cellIterator = row.cellIterator();
-			ArrayList<Object> currentRow = new ArrayList<Object>();
+			ArrayList<Object> currentRow = new ArrayList<>();
 			while (cellIterator.hasNext())
 			{
 				Cell cell = cellIterator.next();
@@ -112,11 +100,10 @@ public  class main
 						currentRow.add(cell.getStringCellValue());
 						break;
 					case Cell.CELL_TYPE_NUMERIC:
-						if(cell.getNumericCellValue() > 1000)
+						if (cell.getNumericCellValue() > 1000)
 						{
 							currentRow.add(cell.getDateCellValue().toInstant().atZone((ZoneId.systemDefault())).toLocalDateTime());
-						}
-						else
+						} else
 						{
 							currentRow.add(cell.getNumericCellValue());
 						}
@@ -144,7 +131,7 @@ public  class main
 		try
 		{
 			importSheet(path);
-			ArrayList<Object> current = new ArrayList<Object>();
+			ArrayList<Object> current = new ArrayList<>();
 			int billingCount, duration;
 			String jNumber;
 			LocalDateTime timeIn, timeOut;
@@ -189,6 +176,7 @@ public  class main
 		catch(Exception e)
 		{
 			e.printStackTrace();
+			throw e;
 		}
 	}
 
