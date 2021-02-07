@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 @SuppressWarnings("ALL")
@@ -73,6 +75,32 @@ public class main
 			billingInfo += " " + billings + "x CD0R";
 		}
 		return billingInfo;
+	}
+
+	private static HashSet<Integer> importMySheet(String path) throws IOException
+	{
+		FileInputStream fis = new FileInputStream(new File(path));
+		XSSFWorkbook wb = new XSSFWorkbook(fis);
+		XSSFSheet sheet = wb.getSheetAt(0);
+		HashSet<Integer> values = new HashSet<>();
+		for (Row row : sheet)
+		{
+			Iterator<Cell> cellIterator = row.cellIterator();
+			Cell cell = cellIterator.next();
+			if(cellIterator.hasNext())
+			{
+				cell = cellIterator.next();
+			}
+			else
+			{
+				continue;
+			}
+			if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+			{
+				values.add((int) cell.getNumericCellValue());
+			}
+		}
+		return values;
 	}
 
 	private static void importSheet(String path) throws IOException
@@ -141,17 +169,19 @@ public class main
 
 	public static void main(String[] args) throws IOException
 	{
-		String path;
+		String path, myPath = "";
 		if (OS)
 		{
 			path = "C:\\Users\\Paul\\IdeaProjects\\Dec2020.xlsx";
 		} else
 		{
-			path = "/Users/paulkrznaric/IdeaProjects/Dec2020.xlsx";
+			path = "/Users/paulkrznaric/IdeaProjects/Jan2021.xlsx";
+			myPath = "/Users/paulkrznaric/Documents/Work/CDU/January CDU 2021.xlsx";
 		}
 		try
 		{
 			importSheet(path);
+			HashSet<Integer> orangeIDs = importMySheet(myPath);
 			ArrayList<Object> current = new ArrayList<>();
 			int billingCount, duration;
 			String jNumber;
@@ -179,6 +209,10 @@ public class main
 				while (jNumber.startsWith("J") || jNumber.startsWith("0"))
 				{
 					jNumber = jNumber.substring(1);
+				}
+				if(orangeIDs.contains(Integer.parseInt(jNumber)))
+				{
+					continue;
 				}
 				currentLine += jNumber + "\t";
 
