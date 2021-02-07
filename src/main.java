@@ -16,7 +16,6 @@ import java.util.Iterator;
 @SuppressWarnings("ALL")
 public class main
 {
-	static ArrayList<ArrayList<Object>> data = new ArrayList<>();
 
 	static boolean OS = isWindows();
 
@@ -103,8 +102,9 @@ public class main
 		return values;
 	}
 
-	private static void importSheet(String path) throws IOException
+	private static ArrayList<ArrayList<Object>> importSheet(String path) throws IOException
 	{
+		ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
 		FileInputStream fis = new FileInputStream(new File(path));
 		XSSFWorkbook wb = new XSSFWorkbook(fis);
 		XSSFSheet sheet = wb.getSheetAt(0);
@@ -135,15 +135,25 @@ public class main
 			}
 			data.add(currentRow);
 		}
+		return data;
 	}
 
 
-	public static String buildBilling(int billingCount, LocalDateTime timeIn, ArrayList<String> doctors, ArrayList<Object> current)
+	/**
+	 * Build the billings based off the set rules
+	 * Doesn't currently split the CD0R
+	 * @param billingCount number of billings assigned to ID
+	 * @param timeIn Time the patient checked in
+	 * @param doctors The list of doctors for the patient
+	 * @param admitted Whether the patient was admitted or not
+	 * @return
+	 */
+	public static String buildBilling(int billingCount, LocalDateTime timeIn, ArrayList<String> doctors, boolean admitted)
 	{
 		String currentLine = doctors.get(0) + ": \t 1x CDA" + "\t";
 		if(doctors.size() == 2)
 		{
-			if(admitted(current))
+			if(admitted)
 			{
 				currentLine +=  " 1x CDI" + "\t";
 			}
@@ -156,7 +166,7 @@ public class main
 		else
 		{
 			currentLine += calculateBilling(billingCount, timeIn) + "\t";
-			if (admitted(current))
+			if (admitted)
 			{
 				currentLine += " 1x CDI" + "\t";
 			} else
@@ -169,6 +179,7 @@ public class main
 
 	public static void main(String[] args) throws IOException
 	{
+		//Set path here
 		String path, myPath = "";
 		if (OS)
 		{
@@ -176,18 +187,20 @@ public class main
 		} else
 		{
 			path = "/Users/paulkrznaric/IdeaProjects/Jan2021.xlsx";
-			myPath = "/Users/paulkrznaric/Documents/Work/CDU/January CDU 2021.xlsx";
+			myPath = "/Users/paulkrznaric/Documents/Work/CDU/January CDU 2021 Final.xlsx";
 		}
+
 		try
 		{
-			importSheet(path);
+			ArrayList<ArrayList<Object>> data = importSheet(path);
+			//filter based on Orange sheets
 			HashSet<Integer> orangeIDs = importMySheet(myPath);
-			ArrayList<Object> current = new ArrayList<>();
+
+			ArrayList<Object> current;
 			int billingCount, duration;
-			String jNumber;
+			String jNumber, currentLine;
 			ArrayList<String> doctors;
 			LocalDateTime timeIn, timeOut;
-			String currentLine;
 
 			for (int i = 1; i < data.size(); i++)
 			{
@@ -237,7 +250,7 @@ public class main
 					billingCount = duration / 2;
 				}
 
-				currentLine += buildBilling(billingCount, timeIn, doctors, current);
+				currentLine += buildBilling(billingCount, timeIn, doctors, admitted(current));
 
 				System.out.println(currentLine);
 			}
