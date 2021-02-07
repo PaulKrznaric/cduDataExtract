@@ -9,11 +9,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 
 @SuppressWarnings("ALL")
-public  class main
+public class main
 {
 	static ArrayList<ArrayList<Object>> data = new ArrayList<>();
 
@@ -53,30 +52,25 @@ public  class main
 
 	private static String calculateBilling(int billings, LocalDateTime timeIn)
 	{
-		String billingInfo = "1x CDA" + "\t\t\t";
-		if(billings == 1)
+		String billingInfo = "";
+		if (billings == 1)
 		{
-			if(isEarlyMorning(timeIn))
+			if (isEarlyMorning(timeIn))
 			{
 				billingInfo += " 1x CD2R";
-			}
-			else if(isWeekend(timeIn))
+			} else if (isWeekend(timeIn))
 			{
 				billingInfo += " 1x CD5R";
-			}
-			else if(isNight(timeIn))
+			} else if (isNight(timeIn))
 			{
 				billingInfo += " 1x CD3R";
-			}
-			else
+			} else
 			{
 				billingInfo += " 1x CD0R";
 			}
-		}
-		else
+		} else if(billings > 1)
 		{
 			billingInfo += " " + billings + "x CD0R";
-
 		}
 		return billingInfo;
 	}
@@ -115,14 +109,43 @@ public  class main
 		}
 	}
 
+
+	public static String buildBilling(int billingCount, LocalDateTime timeIn, ArrayList<String> doctors, ArrayList<Object> current)
+	{
+		String currentLine = doctors.get(0) + ": \t 1x CDA" + "\t";
+		if(doctors.size() == 2)
+		{
+			if(admitted(current))
+			{
+				currentLine +=  " 1x CDI" + "\t";
+			}
+			else
+			{
+				currentLine += " 1x CDO" + "\t";
+			}
+			currentLine += doctors.get(1) + ": \t" + calculateBilling(billingCount, timeIn) + "\t";
+		}
+		else
+		{
+			currentLine += calculateBilling(billingCount, timeIn) + "\t";
+			if (admitted(current))
+			{
+				currentLine += " 1x CDI" + "\t";
+			} else
+			{
+				currentLine += " 1x CDO" + "\t";
+			}
+		}
+		return currentLine;
+	}
+
 	public static void main(String[] args) throws IOException
 	{
 		String path;
-		if(OS)
+		if (OS)
 		{
 			path = "C:\\Users\\Paul\\IdeaProjects\\Dec2020.xlsx";
-		}
-		else
+		} else
 		{
 			path = "/Users/paulkrznaric/IdeaProjects/Dec2020.xlsx";
 		}
@@ -134,70 +157,57 @@ public  class main
 			String jNumber;
 			ArrayList<String> doctors;
 			LocalDateTime timeIn, timeOut;
+			String currentLine;
 
-			for(int i = 1; i < data.size(); i++)
+			for (int i = 1; i < data.size(); i++)
 			{
 				current = data.get(i);
+				currentLine = "";
 
 				doctors = new ArrayList<>();
 				doctors.add((String) current.get(5));
 				String otherDoc = (String) current.get(7);
-				if(!(otherDoc.equals("") || otherDoc.equals(".")))
+				if (!(otherDoc.equals("") || otherDoc.equals(".")))
 				{
-					doctors.add((String) current.get(7));
+					if(!otherDoc.equalsIgnoreCase(doctors.get(0)))
+					{
+						doctors.add((String) current.get(7));
+					}
 				}
 
 				jNumber = (String) current.get(0);
-				while(jNumber.startsWith("J") || jNumber.startsWith("0"))
+				while (jNumber.startsWith("J") || jNumber.startsWith("0"))
 				{
 					jNumber = jNumber.substring(1);
 				}
-				System.out.print(jNumber + "\t\t\t");
+				currentLine += jNumber + "\t";
 
 				timeIn = (LocalDateTime) current.get(4);
 				timeOut = (LocalDateTime) current.get(8);
-				duration =  calculateTime(timeIn, timeOut);
+				duration = calculateTime(timeIn, timeOut);
 
-				//TODO: Print Date
-				if(duration == 2)
+				currentLine += timeIn.toString() + "\t";
+
+				if (duration == 2)
 				{
 					billingCount = 1;
 
-				}
-				else if(duration >= 7 && doctors.size() != 2)
+				} else if (duration >= 7 && doctors.size() != 2)
 				{
 					billingCount = 3;
-				}
-				else if(duration > 14 && doctors.size() == 2)
+				} else if (duration > 14 && doctors.size() == 2)
 				{
 					billingCount = 6;
-				}
-				else
+				} else
 				{
-					billingCount = duration/2;
-				}
-				System.out.print(calculateBilling(billingCount, timeIn) + "\t\t\t");
-				if(admitted(current))
-				{
-					System.out.print(" 1x CDI" + "\t\t\t");
-				}
-				else
-				{
-					System.out.print(" 1x CDO" + "\t\t\t");
-				}
-				if(doctors.size() == 2)
-				{
-					System.out.print(" Admitting doctor: " + doctors.get(0) + "\t\t\t" + "  Billing Doctor: " + doctors.get(1));
-				}
-				else
-				{
-					System.out.print(" Only doctor: " + doctors.get(0));
+					billingCount = duration / 2;
 				}
 
-				System.out.println("");
+				currentLine += buildBilling(billingCount, timeIn, doctors, current);
+
+				System.out.println(currentLine);
 			}
-		}
-		catch(Exception e)
+		} catch (Exception e)
 		{
 			e.printStackTrace();
 			throw e;
