@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 @SuppressWarnings("ALL")
 public class main
@@ -115,15 +113,16 @@ public class main
 	 * @return Returns a set that represents the billing numbers of the patients in the orange sheets
 	 * @throws IOException
 	 */
-	private static HashSet<Integer> orangeSheetImport(String path) throws IOException
+	private static HashMap<Integer,Boolean> orangeSheetImport(String path) throws IOException
 	{
 		FileInputStream fis = new FileInputStream(new File(path));
 		XSSFWorkbook wb = new XSSFWorkbook(fis);
 		XSSFSheet sheet = wb.getSheetAt(0);
-		HashSet<Integer> values = new HashSet<>();
+		HashMap<Integer,Boolean> values = new HashMap<>();
 
 		for (Row row : sheet)
 		{
+
 			Iterator<Cell> cellIterator = row.cellIterator();
 			Cell cell = cellIterator.next();
 			//my billing number is on the second row
@@ -139,7 +138,7 @@ public class main
 			//only care about hte numbers
 			if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
 			{
-				values.add((int) cell.getNumericCellValue());
+				values.put((int) cell.getNumericCellValue(), false);
 			}
 		}
 		return values;
@@ -238,15 +237,15 @@ public class main
 			hospitalGeneratedPath = "C:\\Users\\Paul\\IdeaProjects\\Dec2020.xlsx";
 		} else
 		{
-			hospitalGeneratedPath = "/Users/paulkrznaric/IdeaProjects/Jan2021.xlsx";
-			orangeSheetPath = "/Users/paulkrznaric/Documents/Work/CDU/January CDU 2021 Final.xlsx";
+			hospitalGeneratedPath = "/Users/paulkrznaric/IdeaProjects/Dec2020.xlsx";
+			orangeSheetPath = "/Users/paulkrznaric/Documents/Work/CDU/December CDU 2020 With Automated Items.xlsx";
 		}
 
 		try
 		{
 			ArrayList<ArrayList<Object>> data = automatedReportImport(hospitalGeneratedPath);
 			//filter based on Orange sheets
-			HashSet<Integer> orangeIDs = orangeSheetImport(orangeSheetPath);
+			HashMap<Integer,Boolean> orangeIDs = orangeSheetImport(orangeSheetPath);
 
 			ArrayList<Object> current;
 			int billingCount, duration;
@@ -275,8 +274,9 @@ public class main
 				{
 					jNumber = jNumber.substring(1);
 				}
-				if(orangeIDs.contains(Integer.parseInt(jNumber)))
+				if(orangeIDs.containsKey(Integer.parseInt(jNumber)))
 				{
+					orangeIDs.put(Integer.parseInt(jNumber), true);
 					continue;
 				}
 				currentLine += jNumber + "\t";
@@ -305,6 +305,14 @@ public class main
 				currentLine += buildBilling(billingCount, timeIn, doctors, wasAdmitted(current));
 
 				System.out.println(currentLine);
+			}
+			Set<Integer> orangeIDValues = orangeIDs.keySet();
+			for(Integer i : orangeIDValues)
+			{
+				if(orangeIDs.get(i) == false)
+				{
+					System.out.println("Missing ID: " + i);
+				}
 			}
 		} catch (Exception e)
 		{
