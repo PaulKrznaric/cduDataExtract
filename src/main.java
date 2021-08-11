@@ -15,7 +15,7 @@ import java.util.*;
 public class main
 {
 
-	static boolean OS = isWindows();
+	static boolean isWindows = isWindows();
 
 	public static boolean isWindows()
 	{
@@ -232,17 +232,18 @@ public class main
 	{
 		//Set path here
 		String hospitalGeneratedPath, orangeSheetPath = "";
-		if (OS)
+		if (isWindows)
 		{
 			hospitalGeneratedPath = "C:\\Users\\Paul\\IdeaProjects\\Dec2020.xlsx";
 		} else
 		{
-			hospitalGeneratedPath = "/Users/paulkrznaric/IdeaProjects/Dec2020.xlsx";
-			orangeSheetPath = "/Users/paulkrznaric/Documents/Work/CDU/December CDU 2020 With Automated Items.xlsx";
+			hospitalGeneratedPath = "/Users/paulkrznaric/Documents/Work/CDU/CDU Details June 2021.xlsx";
+			orangeSheetPath = "/Users/paulkrznaric/Documents/Work/CDU/April CDU 2021.xlsx";
 		}
 
 		try
 		{
+			System.out.println(hospitalGeneratedPath);
 			ArrayList<ArrayList<Object>> data = automatedReportImport(hospitalGeneratedPath);
 			//filter based on Orange sheets
 			HashMap<Integer,Boolean> orangeIDs = orangeSheetImport(orangeSheetPath);
@@ -273,6 +274,14 @@ public class main
 				while (jNumber.startsWith("J") || jNumber.startsWith("0"))
 				{
 					jNumber = jNumber.substring(1);
+				}
+				try
+				{
+					jNumber = jNumber.trim();
+					Integer.parseInt(jNumber);
+				} catch(Exception e)
+				{
+					continue;
 				}
 				if(orangeIDs.containsKey(Integer.parseInt(jNumber)))
 				{
