@@ -201,7 +201,7 @@ public class main
 	 */
 	public static String buildBilling(int billingCount, LocalDateTime timeIn, ArrayList<String> doctors, boolean admitted)
 	{
-		String currentLine = doctors.get(0) + ": \t 1x CDA" + "\t";
+		String currentLine = doctors.get(0) + ": \t 1" + "\t";
 		if(doctors.size() == 2)
 		{
 			if(admitted)
@@ -237,8 +237,8 @@ public class main
 			hospitalGeneratedPath = "C:\\Users\\Paul\\IdeaProjects\\Dec2020.xlsx";
 		} else
 		{
-			hospitalGeneratedPath = "/Users/paulkrznaric/Documents/Work/CDU/CDU Details June 2021.xlsx";
-			orangeSheetPath = "/Users/paulkrznaric/Documents/Work/CDU/April CDU 2021.xlsx";
+			hospitalGeneratedPath = "/Users/paulkrznaric/Documents/Work/CDU/CDU Details July 2021.xlsx";
+			orangeSheetPath = "/Users/paulkrznaric/Documents/Work/CDU/July CDU 2021.xlsx";
 		}
 
 		try
@@ -294,7 +294,7 @@ public class main
 				timeOut = (LocalDateTime) current.get(8);
 				duration = lengthOfCDUStay(timeIn, timeOut);
 
-				currentLine += timeIn.toString() + "\t";
+				currentLine += timeIn.getDayOfMonth() + "/" + timeIn.getMonthValue() + "/" + timeIn.getYear() + "\t";
 
 				if (duration == 2)
 				{
